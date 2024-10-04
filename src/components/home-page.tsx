@@ -74,13 +74,13 @@ export function HomePage() {
               <AccordionItem value="item-2">
                 <AccordionTrigger>Are children invited?</AccordionTrigger>
                 <AccordionContent>
-                  Our wedding is an adults-only celebration. We hope this advance notice means you're still able to join us!
+                  Our wedding is an adults-only celebration. We hope this advance notice means you&apos;re still able to join us!
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-3">
-                <AccordionTrigger>What's the parking situation?</AccordionTrigger>
+                <AccordionTrigger>What&apos;s the parking situation?</AccordionTrigger>
                 <AccordionContent>
-                  Parking details will be provided closer to the wedding date. We'll make sure there's ample parking for all our guests.
+                  Parking details will be provided closer to the wedding date. We&apos;ll make sure there&apos;s ample parking for all our guests.
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
@@ -90,7 +90,7 @@ export function HomePage() {
         <section id="rsvp" className="py-16 bg-muted">
           <div className="container text-center">
             <h2 className="text-3xl font-bold mb-4">Ready to Celebrate With Us?</h2>
-            <p className="mb-8">We can't wait to see you on our big day!</p>
+            <p className="mb-8">We can&apos;t wait to see you on our big day!</p>
             <Button size="lg" asChild>
               <Link href="/rsvp">RSVP Now</Link>
             </Button>
