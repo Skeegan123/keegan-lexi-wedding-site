@@ -3,7 +3,7 @@
 export default function WeddingDetails() {
   return (
     <section className="py-16 w-full bg-[#332D2B] text-white">
-      <div className="w-1/2 mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-4 sm:px-6 md:w-3/4 lg:w-1/2 mx-auto">
         <h2 className="text-3xl font-bold text-center mb-8">Wedding Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="text-center">

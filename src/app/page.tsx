@@ -17,7 +17,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/50" />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
           <CountdownTimer targetDate="2025-08-02T16:00:00" />
-          <h1 className="text-6xl md:text-8xl font-serif mt-8 mb-16">ALEXIS & KEEGAN</h1>
+          <h1 className="text-6xl md:text-8xl text-center font-serif mt-8 mb-16">ALEXIS & KEEGAN</h1>
           <BasicDetails 
             day="FRIDAY"
             date='August 2nd, 2025'
