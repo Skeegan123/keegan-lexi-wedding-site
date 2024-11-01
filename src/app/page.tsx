@@ -19,7 +19,7 @@ export default function Home() {
           <CountdownTimer targetDate="2025-08-02T16:00:00" />
           <h1 className="text-6xl md:text-8xl text-center font-serif mt-8 mb-16">ALEXIS & KEEGAN</h1>
           <BasicDetails 
-            day="FRIDAY"
+            day="SATURDAY"
             date='August 2nd, 2025'
             time="4:00PM" 
             location="Snohomish, WA" 
