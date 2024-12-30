@@ -21,7 +21,7 @@ export default function Home() {
           <BasicDetails 
             day="SATURDAY"
             date='August 2nd, 2025'
-            time="4:00PM" 
+            time="4:00PM"
             location="Snohomish, WA" 
           />
         </div>
