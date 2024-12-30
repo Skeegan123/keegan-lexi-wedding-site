@@ -235,7 +235,7 @@ export default function GuestsPage() {
             <TableHead>Last Name</TableHead>
             <TableHead>RSVP Status</TableHead>
             <TableHead>Dietary Restrictions</TableHead>
-            <TableHead>Plus One</TableHead>
+            <TableHead>Is Plus One</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>

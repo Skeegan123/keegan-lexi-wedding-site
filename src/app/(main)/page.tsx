@@ -1,4 +1,4 @@
-import Image from 'next/image'
+import Image from "next/legacy/image"
 import { CountdownTimer } from '@/components/countdown-timer'
 import { BasicDetails } from '@/components/basic-details'
 import WeddingDetails from '@/components/wedding-details'

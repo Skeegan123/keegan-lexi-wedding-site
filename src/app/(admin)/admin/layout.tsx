@@ -12,7 +12,7 @@ export default function AdminLayout({
   return (
     <html>
       <body>
-        <ClerkProvider afterSignOutUrl="/">
+        <ClerkProvider>
           <SignedIn>
             <div className="hidden flex-col md:flex">
               <div className="border-b">
