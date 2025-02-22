@@ -72,10 +72,24 @@ export const getDashboardStats = async () => {
     .from(guests)
     .where(not(isNotNull(guests.isAttending)));
 
+  // Query plus ones allowed
+  const plusOnesAllowed = await db
+    .select({ count: sql`COUNT(*)`.as('count') })
+    .from(invitations)
+    .where(isNotNull(invitations.maxPlusOnes));
+
+  // Query plus ones added
+  const plusOnesAdded = await db
+    .select({ count: sql`COUNT(*)`.as('count') })
+    .from(guests)
+    .where(eq(guests.isPlusOne, true));
+
   return {
     totalGuests: Number(totalGuests[0].count),
     rsvpdYes: Number(rsvpdYes[0].count),
     rsvpdNo: Number(rsvpdNo[0].count),
     pendingRsvp: Number(pendingRsvp[0].count),
+    plusOnesAllowed: Number(plusOnesAllowed[0].count),
+    plusOnesAdded: Number(plusOnesAdded[0].count),
   };
 };

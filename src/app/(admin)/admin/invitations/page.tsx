@@ -25,9 +25,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getAllInvitations } from "@/db/queries/select";
 import { insertInvitation } from "@/db/queries/insert";
-import { deleteInvitation } from "@/db/queries/delete";
+import { deleteGuest, deleteInvitation } from "@/db/queries/delete";
 import { updateInvitation } from "@/db/queries/update";
-import { InsertInvitation, SelectInvitation } from "@/db/schema";
+import { InsertGuest, InsertInvitation, SelectGuest, SelectInvitation } from "@/db/schema";
+import { getGuestsByInvitationId } from "@/db/queries/select";
+import { insertGuest } from "@/db/queries/insert";
+import { GuestDialog } from "@/components/guests/GuestDialog";
+import { updateGuest } from "@/db/queries/update";
 
 export default function InvitationsPage() {
   const [invitations, setInvitations] = useState<SelectInvitation[]>([]);
@@ -37,6 +41,11 @@ export default function InvitationsPage() {
     address: "",
     maxPlusOnes: 0,
   });
+  const [guestsForInvitation, setGuestsForInvitation] = useState<SelectGuest[]>([]);
+  const [showGuestsDialog, setShowGuestsDialog] = useState(false);
+  const [activeInvitation, setActiveInvitation] = useState<SelectInvitation | null>(null);
+  const [editingGuest, setEditingGuest] = useState<SelectGuest|null>(null);
+  const [isGuestDialogOpen, setIsGuestDialogOpen] = useState(false);
 
   const refreshInvitations = async () => {
     const updatedInvitations = await getAllInvitations();
@@ -63,6 +72,28 @@ export default function InvitationsPage() {
   const deleteInvitationHandler = async (id: string) => {
     await deleteInvitation(id);
     await refreshInvitations();
+  };
+
+  const loadGuestsForInvitation = async (invitation: SelectInvitation) => {
+    setActiveInvitation(invitation);
+    const fetchedGuests = await getGuestsByInvitationId(invitation.id);
+    setGuestsForInvitation(fetchedGuests);
+    setShowGuestsDialog(true);
+  };
+
+  const addGuestToInvitation = async (guestData: Partial<InsertGuest>) => {
+    if (!activeInvitation) return;
+    await insertGuest({ ...guestData, invitationId: activeInvitation.id });
+    await loadGuestsForInvitation(activeInvitation);
+  };
+
+  const handleSaveGuest = async (data: Partial<InsertGuest>) => {
+    if (!editingGuest) {
+      await addGuestToInvitation(data);
+    } else {
+      await updateGuest(editingGuest.id, data);
+      if (activeInvitation) await loadGuestsForInvitation(activeInvitation);
+    }
   };
 
   return (
@@ -226,12 +257,98 @@ export default function InvitationsPage() {
                   >
                     Delete
                   </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => loadGuestsForInvitation(invitation)}
+                  >
+                    View Guests
+                  </Button>
                 </div>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+      <Dialog open={showGuestsDialog} onOpenChange={setShowGuestsDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Guests for {activeInvitation?.name}
+            </DialogTitle>
+            <DialogDescription>
+              Manage guests belonging to this invitation
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-4">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>First Name</TableHead>
+                  <TableHead>Last Name</TableHead>
+                  <TableHead>Is Plus One</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {guestsForInvitation.map((guest) => (
+                  <TableRow key={guest.id}>
+                    <TableCell>{guest.firstName}</TableCell>
+                    <TableCell>{guest.lastName}</TableCell>
+                    <TableCell>{guest.isPlusOne ? "Yes" : "No"}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm"
+                          onClick={() => {
+                            setEditingGuest(guest);
+                            setIsGuestDialogOpen(true);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={async () => {
+                            await deleteGuest(guest.id);
+                            if (activeInvitation) {
+                              await loadGuestsForInvitation(activeInvitation);
+                            }
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+
+            <Button onClick={() => {
+              setEditingGuest(null);
+              setIsGuestDialogOpen(true);
+            }}>
+              Add Guest
+            </Button>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowGuestsDialog(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <GuestDialog
+        open={isGuestDialogOpen}
+        onOpenChange={setIsGuestDialogOpen}
+        existingGuest={editingGuest}
+        onSave={handleSaveGuest}
+        invitations={[]}
+      />
     </div>
   );
 }

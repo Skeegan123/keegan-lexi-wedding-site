@@ -28,8 +28,9 @@ import { getGuests } from "@/db/queries/select";
 import { insertGuest } from "@/db/queries/insert";
 import { deleteGuest, deleteManyGuests } from "@/db/queries/delete";
 import { updateGuest, updateManyGuests } from "@/db/queries/update";
-import { InsertGuest, SelectGuest } from "@/db/schema";
+import { InsertGuest, SelectGuest, SelectInvitation } from "@/db/schema";
 import { Badge } from "@/components/ui/badge";
+import { getAllInvitations } from "@/db/queries/select";
 
 export default function GuestsPage() {
   const [guests, setGuests] = useState<SelectGuest[]>([]);
@@ -41,16 +42,31 @@ export default function GuestsPage() {
     isAttending: null,
     dietaryRestrictions: "",
     isPlusOne: false,
+    invitationId: "",
   });
   const [bulkEditValue, setBulkEditValue] = useState<string>("");
+  const [invitations, setInvitations] = useState<SelectInvitation[]>([]);
+  const [csvFile, setCsvFile] = useState<File | null>(null);
+
+  // NEW: States for search, filtering, and sorting
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterRsvp, setFilterRsvp] = useState("all"); // options: "all", "attending", "declined", "undecided"
+  const [sortBy, setSortBy] = useState<string>("invitation"); // default sort by invitation
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   const refreshGuests = async () => {
     const updatedGuests = await getGuests();
     setGuests(updatedGuests);
   };
 
+  const refreshInvitations = async () => {
+    const updatedInvitations = await getAllInvitations();
+    setInvitations(updatedInvitations);
+  };
+
   useEffect(() => {
     refreshGuests();
+    refreshInvitations();
   }, []);
 
   const addGuest = async () => {
@@ -61,6 +77,7 @@ export default function GuestsPage() {
       isAttending: null,
       dietaryRestrictions: "",
       isPlusOne: false,
+      invitationId: "",
     });
     await refreshGuests();
   };
@@ -80,6 +97,73 @@ export default function GuestsPage() {
     await deleteManyGuests(selectedGuests);
     setSelectedGuests([]);
     await refreshGuests();
+  };
+
+  // NEW: Compute filtered and sorted guests list
+  const filteredGuests = guests.filter((guest) => {
+    let isMatch = true;
+    if (filterRsvp !== "all") {
+      if (filterRsvp === "attending") {
+        isMatch = guest.isAttending === true;
+      } else if (filterRsvp === "declined") {
+        isMatch = guest.isAttending === false;
+      } else if (filterRsvp === "undecided") {
+        isMatch = guest.isAttending === null;
+      }
+    }
+    if (searchQuery.trim() !== "") {
+      const lowerQuery = searchQuery.toLowerCase();
+      isMatch = Boolean(isMatch &&
+        (guest.firstName?.toLowerCase().includes(lowerQuery) ||
+          guest.lastName?.toLowerCase().includes(lowerQuery)));
+    }
+    return isMatch;
+  });
+
+  const sortedGuests = filteredGuests.slice().sort((a, b) => {
+    if (sortBy === "invitation") {
+      const invA = invitations.find(inv => inv.id === a.invitationId)?.name || "";
+      const invB = invitations.find(inv => inv.id === b.invitationId)?.name || "";
+      return sortOrder === "asc"
+        ? invA.localeCompare(invB)
+        : invB.localeCompare(invA);
+    }
+    if (sortBy === "isAttending") {
+      const mapStatus = (value: boolean | null) => {
+        if (value === true) return 2;
+        if (value === false) return 0;
+        return 1;
+      };
+      return sortOrder === "asc"
+        ? mapStatus(a.isAttending) - mapStatus(b.isAttending)
+        : mapStatus(b.isAttending) - mapStatus(a.isAttending);
+    }
+    const valA = a[sortBy as keyof SelectGuest];
+    const valB = b[sortBy as keyof SelectGuest];
+    if (typeof valA === "string" && typeof valB === "string") {
+      return sortOrder === "asc"
+        ? valA.localeCompare(valB)
+        : valB.localeCompare(valA);
+    }
+    if (typeof valA === "number" && typeof valB === "number") {
+      return sortOrder === "asc" ? valA - valB : valB - valA;
+    }
+    if (typeof valA === "boolean" && typeof valB === "boolean") {
+      return sortOrder === "asc"
+        ? Number(valA) - Number(valB)
+        : Number(valB) - Number(valA);
+    }
+    return 0;
+  });
+
+  // NEW: Sorting handler for table header clicks
+  const handleSort = (column: string) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(column);
+      setSortOrder("asc");
+    }
   };
 
   return (
@@ -209,12 +293,99 @@ export default function GuestsPage() {
                     }
                   />
                 </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Invitation</Label>
+                  <select
+                    className="col-span-3 flex h-9 w-full rounded-md border border-input bg-background px-3 py-1"
+                    value={newGuest.invitationId || ""}
+                    onChange={(e) =>
+                      setNewGuest({ ...newGuest, invitationId: e.target.value })
+                    }
+                  >
+                    <option value="">None</option>
+                    {invitations.map((inv) => (
+                      <option key={inv.id} value={inv.id}>
+                        {inv.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
               <DialogFooter>
                 <Button onClick={addGuest}>Add Guest</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button>Import Guests</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Import Guests</DialogTitle>
+                <DialogDescription>
+                  Import guests from a CSV file.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <Input
+                  type="file"
+                  accept=".csv"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      setCsvFile(e.target.files[0]);
+                    }
+                  }}
+                />
+              </div>
+              <DialogFooter>
+                <Button onClick={async () => {
+                  if (!csvFile) {
+                    alert("Please select a CSV file first.");
+                    return;
+                  }
+                  const formData = new FormData();
+                  formData.append("file", csvFile);
+
+                  const res = await fetch("/api/import-guests", {
+                    method: "POST",
+                    body: formData,
+                  });
+
+                  const data = await res.json();
+                  if (res.ok) {
+                    alert("Imported " + data.inserted + " guests");
+                    setCsvFile(null);
+                    await refreshGuests();
+                  } else {
+                    alert("Error: " + data.error);
+                  }
+                }}>
+                  Import
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        <div className="flex gap-2">
+          <Input
+            type="text"
+            placeholder="Search Guests"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <select
+            className="rounded-md border border-input px-2 py-1"
+            value={filterRsvp}
+            onChange={(e) => setFilterRsvp(e.target.value)}
+          >
+            <option value="all">All RSVP Status</option>
+            <option value="attending">Attending</option>
+            <option value="declined">Declined</option>
+            <option value="undecided">Undecided</option>
+          </select>
         </div>
       </div>
       <Separator className="my-6" />
@@ -231,16 +402,47 @@ export default function GuestsPage() {
                 }}
               />
             </TableHead>
-            <TableHead>First Name</TableHead>
-            <TableHead>Last Name</TableHead>
-            <TableHead>RSVP Status</TableHead>
-            <TableHead>Dietary Restrictions</TableHead>
-            <TableHead>Is Plus One</TableHead>
+            <TableHead
+              className="cursor-pointer"
+              onClick={() => handleSort("firstName")}
+            >
+              First Name {sortBy === "firstName" ? (sortOrder === "asc" ? "↑" : "↓") : "↕"}
+            </TableHead>
+            <TableHead
+              className="cursor-pointer"
+              onClick={() => handleSort("lastName")}
+            >
+              Last Name {sortBy === "lastName" ? (sortOrder === "asc" ? "↑" : "↓") : "↕"}
+            </TableHead>
+            <TableHead
+              className="cursor-pointer"
+              onClick={() => handleSort("isAttending")}
+            >
+              RSVP Status {sortBy === "isAttending" ? (sortOrder === "asc" ? "↑" : "↓") : "↕"}
+            </TableHead>
+            <TableHead
+              className="cursor-pointer"
+              onClick={() => handleSort("dietaryRestrictions")}
+            >
+              Dietary Restrictions {sortBy === "dietaryRestrictions" ? (sortOrder === "asc" ? "↑" : "↓") : "↕"}
+            </TableHead>
+            <TableHead
+              className="cursor-pointer"
+              onClick={() => handleSort("isPlusOne")}
+            >
+              Is Plus One {sortBy === "isPlusOne" ? (sortOrder === "asc" ? "↑" : "↓") : "↕"}
+            </TableHead>
+            <TableHead
+              className="cursor-pointer"
+              onClick={() => handleSort("invitation")}
+            >
+              Invitation {sortBy === "invitation" ? (sortOrder === "asc" ? "↑" : "↓") : "↕"}
+            </TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {guests.map((guest) => (
+          {sortedGuests.map((guest) => (
             <TableRow key={guest.id}>
               <TableCell>
                 <Checkbox
@@ -278,6 +480,12 @@ export default function GuestsPage() {
                 <Badge variant={guest.isPlusOne ? "success" : "secondary"}>
                   {guest.isPlusOne ? "Yes" : "No"}
                 </Badge>
+              </TableCell>
+              <TableCell>
+                {
+                  invitations.find(inv => inv.id === guest.invitationId)?.name 
+                  || "None"
+                }
               </TableCell>
               <TableCell>
                 <div className="flex gap-2">
@@ -366,6 +574,26 @@ export default function GuestsPage() {
                             }
                           />
                         </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label className="text-right">Invitation</Label>
+                          <select
+                            className="col-span-3 flex h-9 w-full rounded-md border border-input bg-background px-3 py-1"
+                            value={editingGuest?.invitationId ?? ""}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              setEditingGuest((prev) =>
+                                prev ? { ...prev, invitationId: value || null } : null
+                              );
+                            }}
+                          >
+                            <option value="">None</option>
+                            {invitations.map((inv) => (
+                              <option key={inv.id} value={inv.id}>
+                                {inv.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
                       </div>
                       <DialogFooter>
                         <Button onClick={async () => {
@@ -376,6 +604,7 @@ export default function GuestsPage() {
                               isAttending: editingGuest.isAttending,
                               dietaryRestrictions: editingGuest.dietaryRestrictions,
                               isPlusOne: editingGuest.isPlusOne,
+                              invitationId: editingGuest.invitationId,
                             });
                             setEditingGuest(null);
                             await refreshGuests();
