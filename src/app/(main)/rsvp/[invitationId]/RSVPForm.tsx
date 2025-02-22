@@ -130,7 +130,7 @@ export default function RSVPForm({ invitation, guests }: RSVPFormProps) {
       // Clear unsaved changes after a successful save
       setIsDirty(false);
       // Navigate to the Thank You page after saving RSVP
-      router.push(`/rsvp/thank-you?invitationId=${invitation.id}`);
+      router.push(`/rsvp/${invitation.id}/thank-you`);
     } catch (error) {
       console.error('Error saving RSVP:', error);
       alert('There was an error saving your RSVP. Please try again.');

@@ -12,10 +12,18 @@ import {
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 export interface PieChartProps {
-  data: any; // You can replace 'any' with a more specific type if needed
+  data: {
+    labels: string[];
+    datasets: {
+      data: number[];
+      backgroundColor: string[];
+      borderColor?: string[];
+      borderWidth?: number;
+    }[];
+  };
   options?: ChartOptions;
 }
 
 export default function PieChart({ data, options }: PieChartProps) {
-  return <Pie data={data} options={options} />;
-} 
+  return <Pie data={data} options={options as ChartOptions<'pie'>} />;
+}
