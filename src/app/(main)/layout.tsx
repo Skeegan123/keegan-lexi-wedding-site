@@ -1,5 +1,5 @@
 import { Inter, Libre_Caslon_Text } from 'next/font/google'
-import './globals.css'
+import '../globals.css'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
 import Script from 'next/script'
@@ -32,10 +32,10 @@ export default function RootLayout({
       strategy="afterInteractive"
     />
     <html lang="en" className={`${serif.variable} ${inter.variable}`}>
-      <body>
-        <Navbar />
-        {children}
-        <Footer />
+      <body className="pt-16">
+          <Navbar />
+          {children}
+          <Footer />
       </body>
     </html>
     </>

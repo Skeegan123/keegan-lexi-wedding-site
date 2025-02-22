@@ -1,4 +1,4 @@
-import Image from 'next/image'
+import Image from "next/legacy/image"
 import { CountdownTimer } from '@/components/countdown-timer'
 import { BasicDetails } from '@/components/basic-details'
 import WeddingDetails from '@/components/wedding-details'
@@ -6,7 +6,7 @@ import WeddingDetails from '@/components/wedding-details'
 export default function Home() {
   return (
     <main className="flex flex-col items-center justify-between min-h-screen">
-      <section className="relative w-full h-screen">
+      <section className="relative w-full h-[calc(100vh-64px)]">
         <Image
           src="https://imagedelivery.net/yJ7bepQTW_ib5TtPRM2R9A/72562ab5-0ade-4a6f-8e11-b1ab26e42100/public?height=6192&width=4128"
           alt="Alexis and Keegan"
@@ -21,7 +21,7 @@ export default function Home() {
           <BasicDetails 
             day="SATURDAY"
             date='August 2nd, 2025'
-            time="4:00PM" 
+            time="4:00PM"
             location="Snohomish, WA" 
           />
         </div>
