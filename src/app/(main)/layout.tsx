@@ -32,7 +32,7 @@ export default function RootLayout({
       strategy="afterInteractive"
     />
     <html lang="en" className={`${serif.variable} ${inter.variable}`}>
-      <body className="pt-16">
+      <body className="bg-[#F0EAE1] pt-5">
           <Navbar />
           {children}
           <Footer />
