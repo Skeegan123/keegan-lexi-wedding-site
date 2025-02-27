@@ -21,7 +21,7 @@ export default function ThankYouPage() {
 
   return (
     <div className="h-[calc(100vh-130px)] flex flex-col items-center justify-center p-4">
-      <h1 className="text-4xl font-bold mb-4">Thank You for RSVPing!</h1>
+      <h1 className="text-4xl font-bold mb-4 text-center">Thank You for RSVPing!</h1>
       <p className="text-lg mb-8">Your RSVP was successfully saved.</p>
       <div className="flex space-x-4">
         <Button onClick={handleEditRSVP} variant="outline">

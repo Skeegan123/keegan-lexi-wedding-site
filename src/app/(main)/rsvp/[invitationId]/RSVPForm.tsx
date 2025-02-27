@@ -161,124 +161,141 @@ export default function RSVPForm({ invitation, guests }: RSVPFormProps) {
     : 0;
 
   return (
-    <form className="container mx-auto p-4" onSubmit={(e) => e.preventDefault()}>
+    <form className="container mx-auto px-2 sm:px-4 py-4" onSubmit={(e) => e.preventDefault()}>
       <Card className="w-full max-w-4xl mx-auto">
         <CardHeader>
-          <CardTitle className="text-3xl font-bold text-center">{invitation.name}</CardTitle>
+          <CardTitle className="text-2xl sm:text-3xl font-bold text-center">{invitation.name}</CardTitle>
         </CardHeader>
         <CardContent>
           {/* Global attendance control */}
-          <div className="mb-6 flex justify-end space-x-2">
-              <Button className="bg-green-500 hover:bg-green-600 text-white" variant="secondary" onClick={() => markAllAttendance(true)}>All Attending</Button>
-              <Button className="bg-red-500 hover:bg-red-600 text-white" variant="secondary" onClick={() => markAllAttendance(false)}>None Attending</Button>
+          <div className="mb-4 sm:mb-6 flex flex-wrap justify-center sm:justify-end gap-2">
+              <Button 
+                className="bg-green-500 hover:bg-green-600 text-white flex-1 sm:flex-none" 
+                variant="secondary" 
+                onClick={() => markAllAttendance(true)}
+              >
+                All Attending
+              </Button>
+              <Button 
+                className="bg-red-500 hover:bg-red-600 text-white flex-1 sm:flex-none" 
+                variant="secondary" 
+                onClick={() => markAllAttendance(false)}
+              >
+                None Attending
+              </Button>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Attendance</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dietary Restrictions</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {sortedGuests.map(guest => (
-                  <tr key={guest.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {guest.firstName} {guest.lastName}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex space-x-1">
-                        <Button 
-                          size="sm"
-                          onClick={() => handleAttendanceChange(guest.id, true)}
-                          className={`w-28 ${localAttendance[guest.id] ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-white border border-green-500 text-green-500 hover:bg-green-500 hover:text-white'}`}
-                        >
-                          Attending
-                        </Button>
-                        <Button 
-                          size="sm"
-                          onClick={() => handleAttendanceChange(guest.id, false)}
-                          className={`w-28 ${!localAttendance[guest.id] ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-white border border-red-500 text-red-500 hover:bg-red-500 hover:text-white'}`}
-                        >
-                          Not Attending
-                        </Button>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+          {/* Mobile-friendly guest cards instead of a table */}
+          <div className="space-y-4">
+            {sortedGuests.map(guest => (
+              <Card key={guest.id} className="p-3 sm:p-4">
+                <div className="flex flex-col space-y-3">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-medium text-lg">{guest.firstName} {guest.lastName}</h3>
+                    {guest.isPlusOne && (
                       <Button
                         size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setEditingDietaryGuest(guest.id);
-                          const restrictions = localDietary[guest.id] || '';
-                          setEditingDietarySelections({
-                            glutenFree: restrictions.toLowerCase().includes("gluten free"),
-                            dairyFree: restrictions.toLowerCase().includes("dairy free")
-                          });
-                        }}
+                        variant="ghost"
+                        onClick={() => handleDeletePlusOne(guest.id)}
+                        className="text-red-500 p-1 h-auto"
                       >
-                        Edit Dietary Restrictions
+                        <X className="h-4 w-4" />
                       </Button>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      {guest.isPlusOne && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleDeletePlusOne(guest.id)}
-                          className="text-red-500"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Attendance</p>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Button 
+                        size="sm"
+                        onClick={() => handleAttendanceChange(guest.id, true)}
+                        className={`w-full sm:w-auto ${localAttendance[guest.id] ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-white border border-green-500 text-green-500 hover:bg-green-500 hover:text-white'}`}
+                      >
+                        Attending
+                      </Button>
+                      <Button 
+                        size="sm"
+                        onClick={() => handleAttendanceChange(guest.id, false)}
+                        className={`w-full sm:w-auto ${!localAttendance[guest.id] ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-white border border-red-500 text-red-500 hover:bg-red-500 hover:text-white'}`}
+                      >
+                        Not Attending
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Dietary Restrictions</p>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full sm:w-auto"
+                      onClick={() => {
+                        setEditingDietaryGuest(guest.id);
+                        const restrictions = localDietary[guest.id] || '';
+                        setEditingDietarySelections({
+                          glutenFree: restrictions.toLowerCase().includes("gluten free"),
+                          dairyFree: restrictions.toLowerCase().includes("dairy free")
+                        });
+                      }}
+                    >
+                      {localDietary[guest.id] ? 
+                        `${localDietary[guest.id]}` : 
+                        'Add Dietary Restrictions'}
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ))}
           </div>
 
           {editingDietaryGuest !== null && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-              <div className="bg-white p-4 rounded shadow-lg w-80">
-                <h2 className="text-xl font-bold mb-4">Edit Dietary Restrictions</h2>
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
+              <div className="bg-white p-4 rounded shadow-lg w-full max-w-xs sm:max-w-md">
+                <h2 className="text-xl font-bold mb-4">Dietary Restrictions</h2>
                 <div className="mb-4">
-                  <Label>
+                  <Label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={editingDietarySelections.glutenFree}
                       onChange={(e) => setEditingDietarySelections(prev => ({ ...prev, glutenFree: e.target.checked }))}
+                      className="mr-2 h-5 w-5"
                     />
-                    <span className="ml-2">Gluten Free</span>
+                    <span className="text-base">Gluten Free</span>
                   </Label>
                 </div>
                 <div className="mb-4">
-                  <Label>
+                  <Label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={editingDietarySelections.dairyFree}
                       onChange={(e) => setEditingDietarySelections(prev => ({ ...prev, dairyFree: e.target.checked }))}
+                      className="mr-2 h-5 w-5"
                     />
-                    <span className="ml-2">Dairy Free</span>
+                    <span className="text-base">Dairy Free</span>
                   </Label>
                 </div>
-                <div className="flex justify-end space-x-2">
-                  <Button variant="secondary" onClick={() => setEditingDietaryGuest(null)}>
+                <div className="flex flex-col sm:flex-row sm:justify-end gap-2">
+                  <Button 
+                    variant="secondary" 
+                    className="w-full sm:w-auto" 
+                    onClick={() => setEditingDietaryGuest(null)}
+                  >
                     Cancel
                   </Button>
-                  <Button onClick={() => {
-                    if (editingDietaryGuest !== null) {
-                      const selectedRestrictions: string[] = [];
-                      if (editingDietarySelections.glutenFree) selectedRestrictions.push("Gluten Free");
-                      if (editingDietarySelections.dairyFree) selectedRestrictions.push("Dairy Free");
-                      setLocalDietary(prev => ({ ...prev, [editingDietaryGuest]: selectedRestrictions.join(", ") }));
-                      setIsDirty(true);
-                    }
-                    setEditingDietaryGuest(null);
-                  }}>
+                  <Button 
+                    className="w-full sm:w-auto"
+                    onClick={() => {
+                      if (editingDietaryGuest !== null) {
+                        const selectedRestrictions: string[] = [];
+                        if (editingDietarySelections.glutenFree) selectedRestrictions.push("Gluten Free");
+                        if (editingDietarySelections.dairyFree) selectedRestrictions.push("Dairy Free");
+                        setLocalDietary(prev => ({ ...prev, [editingDietaryGuest]: selectedRestrictions.join(", ") }));
+                        setIsDirty(true);
+                      }
+                      setEditingDietaryGuest(null);
+                    }}
+                  >
                     Done
                   </Button>
                 </div>
@@ -286,16 +303,16 @@ export default function RSVPForm({ invitation, guests }: RSVPFormProps) {
             </div>
           )}
 
-          {/* Render the plus ones section only if there's at least one unsaved plus one or there is space to add one */}
+          {/* Plus ones section */}
           {invitation.maxPlusOnes != null && invitation.maxPlusOnes > 0 && (newGuests.length > 0 || remainingPlusOnes > 0) && (
-            <div className="mt-6 pb-6">
+            <div className="mt-6 pb-4">
               <h3 className="text-xl font-semibold mb-4">Plus Ones</h3>
               <div className="space-y-4">
                 {newGuests.map((guest, index) => (
-                  <div key={index} className="border p-2 mb-2 relative">
+                  <Card key={index} className="p-3 sm:p-4 relative">
                     <button
                       type="button"
-                      className="absolute top-0 right-0 p-1 text-red-500"
+                      className="absolute top-2 right-2 p-1 text-red-500"
                       onClick={() => {
                         const newArray = [...newGuests];
                         newArray.splice(index, 1);
@@ -305,9 +322,9 @@ export default function RSVPForm({ invitation, guests }: RSVPFormProps) {
                     >
                       <X className="h-4 w-4" />
                     </button>
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <div>
-                        <Label htmlFor={`plusOneFirstName-${index}`}>First Name</Label>
+                        <Label htmlFor={`plusOneFirstName-${index}`} className="block mb-1">First Name</Label>
                         <Input
                           id={`plusOneFirstName-${index}`}
                           value={guest.firstName || ''}
@@ -317,11 +334,10 @@ export default function RSVPForm({ invitation, guests }: RSVPFormProps) {
                             setNewGuests(newArray);
                             setIsDirty(true);
                           }}
-                          className="mt-1"
                         />
                       </div>
                       <div>
-                        <Label htmlFor={`plusOneLastName-${index}`}>Last Name</Label>
+                        <Label htmlFor={`plusOneLastName-${index}`} className="block mb-1">Last Name</Label>
                         <Input
                           id={`plusOneLastName-${index}`}
                           value={guest.lastName || ''}
@@ -331,73 +347,82 @@ export default function RSVPForm({ invitation, guests }: RSVPFormProps) {
                             setNewGuests(newArray);
                             setIsDirty(true);
                           }}
-                          className="mt-1"
                         />
                       </div>
                       <div>
-                        <Label className="font-medium">Dietary Restrictions</Label>
-                      </div>
-                      <div className="flex space-x-4 items-center">
-                        <Label>
-                          <input
-                            type="checkbox"
-                            checked={!!guest.dietaryRestrictions?.includes('Gluten Free')}
-                            onChange={(e) => {
-                              const newArray = [...newGuests];
-                              const restrictions = guest.dietaryRestrictions?.split(',').filter(r => r.trim()) || [];
-                              if (e.target.checked) {
-                                restrictions.push('Gluten Free');
-                              } else {
-                                const idx = restrictions.indexOf('Gluten Free');
-                                if (idx >= 0) restrictions.splice(idx, 1);
-                              }
-                              newArray[index] = { ...newArray[index], dietaryRestrictions: restrictions.join(',') };
-                              setNewGuests(newArray);
-                              setIsDirty(true);
-                            }}
-                          />
-                          <span className="ml-2">Gluten Free</span>
-                        </Label>
-                        <Label>
-                          <input
-                            type="checkbox"
-                            checked={!!guest.dietaryRestrictions?.includes('Dairy Free')}
-                            onChange={(e) => {
-                              const newArray = [...newGuests];
-                              const restrictions = guest.dietaryRestrictions?.split(',').filter(r => r.trim()) || [];
-                              if (e.target.checked) {
-                                restrictions.push('Dairy Free');
-                              } else {
-                                const idx = restrictions.indexOf('Dairy Free');
-                                if (idx >= 0) restrictions.splice(idx, 1);
-                              }
-                              newArray[index] = { ...newArray[index], dietaryRestrictions: restrictions.join(',') };
-                              setNewGuests(newArray);
-                              setIsDirty(true);
-                            }}
-                          />
-                          <span className="ml-2">Dairy Free</span>
-                        </Label>
+                        <p className="font-medium mb-2">Dietary Restrictions</p>
+                        <div className="flex flex-col space-y-2">
+                          <Label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              checked={!!guest.dietaryRestrictions?.includes('Gluten Free')}
+                              onChange={(e) => {
+                                const newArray = [...newGuests];
+                                const restrictions = guest.dietaryRestrictions?.split(',').filter(r => r.trim()) || [];
+                                if (e.target.checked) {
+                                  restrictions.push('Gluten Free');
+                                } else {
+                                  const idx = restrictions.indexOf('Gluten Free');
+                                  if (idx >= 0) restrictions.splice(idx, 1);
+                                }
+                                newArray[index] = { ...newArray[index], dietaryRestrictions: restrictions.join(',') };
+                                setNewGuests(newArray);
+                                setIsDirty(true);
+                              }}
+                              className="mr-2 h-5 w-5"
+                            />
+                            <span>Gluten Free</span>
+                          </Label>
+                          <Label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              checked={!!guest.dietaryRestrictions?.includes('Dairy Free')}
+                              onChange={(e) => {
+                                const newArray = [...newGuests];
+                                const restrictions = guest.dietaryRestrictions?.split(',').filter(r => r.trim()) || [];
+                                if (e.target.checked) {
+                                  restrictions.push('Dairy Free');
+                                } else {
+                                  const idx = restrictions.indexOf('Dairy Free');
+                                  if (idx >= 0) restrictions.splice(idx, 1);
+                                }
+                                newArray[index] = { ...newArray[index], dietaryRestrictions: restrictions.join(',') };
+                                setNewGuests(newArray);
+                                setIsDirty(true);
+                              }}
+                              className="mr-2 h-5 w-5"
+                            />
+                            <span>Dairy Free</span>
+                          </Label>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </Card>
                 ))}
                 {remainingPlusOnes > 0 && (
-                  <Button variant="outline" onClick={() => setNewGuests([...newGuests, { dietaryRestrictions: '' }])}>
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => setNewGuests([...newGuests, { dietaryRestrictions: '' }])}
+                  >
                     Add Plus One
                   </Button>
                 )}
               </div>
             </div>
           )}
-          <Button 
-            type="button"
-            onClick={handleSaveRSVP}
-            disabled={isSaving}
-            className="w-full"
-          >
-            {isSaving ? 'Submitting...' : 'Save RSVP'}
-          </Button>
+
+          {/* Submit button */}
+          <div className="mt-6">
+            <Button 
+              type="button"
+              onClick={handleSaveRSVP}
+              disabled={isSaving}
+              className="w-full py-6 text-lg"
+            >
+              {isSaving ? 'Submitting...' : 'Save RSVP'}
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </form>
