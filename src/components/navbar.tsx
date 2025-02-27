@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 export default function Navbar() {
   return (
-    <nav className="top-0 left-0 right-0 bg-[#F0EAE1] z-50 px-10">
+    <nav className="top-0 left-0 right-0 bg-[#F0EAE1] z-50 px-10 pb-5">
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
@@ -14,9 +14,9 @@ export default function Navbar() {
             <Link href="/" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900">
               Home
             </Link>
-            {/* <Link href="/details" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900">
+            <Link href="/details" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900">
               Details
-            </Link> */}
+            </Link>
             {/* <Link href="/gallery" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900">
               Gallery
             </Link> */}
