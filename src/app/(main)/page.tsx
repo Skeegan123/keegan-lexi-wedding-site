@@ -3,13 +3,14 @@ import Image from "next/legacy/image"
 export default function Home() {
   return (
     <main className="flex flex-col items-center justify-between min-h-screen bg-[#F0EAE1] px-10">
-      <section className="relative w-full h-[calc(100vh-144px)] mt-5 mb-10 p-10 bg-white">
+      <section className="relative w-full h-[calc(100vh-144px)] mb-10 p-10 bg-white">
         <Image
           src="https://imagedelivery.net/yJ7bepQTW_ib5TtPRM2R9A/72562ab5-0ade-4a6f-8e11-b1ab26e42100/public?height=6192&width=4128"
           alt="Alexis and Keegan"
           quality={100}
           layout="fill"
           objectFit="cover"
+          className="hero-image"
           priority
         />
         <div className="absolute inset-0 bg-black/50" />
@@ -26,7 +27,7 @@ export default function Home() {
         </div>
       </section>
 
-      <div className="w-full h-[640px] sm:h-[600px] bg-[#5C4033] text-white py-10 font-serif justify-center">
+      <div className="w-full h-[640px] sm:h-[580px] bg-[#5C4033] text-white py-10 font-serif justify-center">
         <div className="max-w-full mx-auto sm:mx-16 flex flex-col md:flex-row items-center justify-between px-10 gap-10 sm:gap-30">
           <div className="flex-1 max-w-full">
             <h1 className="text-4xl mb-4 sm:text-5xl sm:mb-16">Wedding Details</h1>
