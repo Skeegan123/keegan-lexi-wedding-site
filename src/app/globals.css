@@ -80,3 +80,13 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+.hero-image {
+  object-position: center;
+}
+
+@media (max-width: 640px) {
+  .hero-image {
+    object-position: -280px center !important;
+  }
+}
